@@ -8,6 +8,15 @@ import neBor from './photos/ne-bor.jpg'
 // num is the number drawn on the photo. Variants have no number.
 type Problem = { num?: string, name?: string, grade?: string, note?: string }
 
+export const parking = '46.06178, 14.63783'
+
+// 'Ne bor' -> 'ne-bor', same as the photo file name
+export const slug = (name: string) => name.toLowerCase().replace(' ', '-')
+
+// Font grades sort as plain strings ('6c' < '7a' < '8a' < '8a+'), so no lookup table needed.
+export const band = (g = '') =>
+  !/^\d/.test(g) ? 'none' : g < '7a' ? 'easy' : g < '7c' ? 'mid' : g <= '8a' ? 'hard' : 'max'
+
 export const walls: { name: string, photo: ImageMetadata, problems: Problem[] }[] = [
   {
     name: 'Karma', photo: karma, problems: [

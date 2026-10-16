@@ -1,15 +1,9 @@
 ---
 import { Image } from 'astro:assets'
-import { walls } from '../walls'
+import { band, parking, slug, walls } from '../walls'
 import '@fontsource/big-shoulders-display/800'
 import '@fontsource/public-sans/400'
 import '@fontsource/public-sans/600'
-
-// Font grades sort as plain strings ('6c' < '7a' < '8a' < '8a+'), so no lookup table needed.
-const band = (g = '') =>
-  !/^\d/.test(g) ? 'none' : g < '7a' ? 'easy' : g < '7c' ? 'mid' : g <= '8a' ? 'hard' : 'max'
-
-const parking = '46.06178, 14.63783'
 ---
 
 <html lang="sl">
@@ -24,6 +18,7 @@ const parking = '46.06178, 14.63783'
     <h1>Nenatančen vodniček Zaloga</h1>
     <p class="sub">po <s>slabem</s> spominu</p>
     <p>Linije so narisane na pamet, imena in ocene tudi.</p>
+    <button class="save" onclick="print()">Shrani PDF</button>
   </header>
 
   <section class="approach">
@@ -42,6 +37,7 @@ const parking = '46.06178, 14.63783'
       </a>
       <div>
         <h2>{wall.name}</h2>
+        <a class="save" href={`/topo/${slug(wall.name)}.jpg`} download={`zalog-${slug(wall.name)}.jpg`}>Shrani sliko</a>
         <ol>
           {wall.problems.map(p => (
             <li class={p.num ? '' : 'variant'}>
@@ -59,6 +55,17 @@ const parking = '46.06178, 14.63783'
   ))}
 
   <footer>Ocene so po Fontainebleau lestvici. Ko stran enkrat odpreš, deluje tudi brez signala.</footer>
+
+  <script>
+    // On phones a plain download lands in Files, the share sheet has "Save Image" which goes to the gallery
+    const phone = matchMedia('(pointer: coarse)').matches
+      && navigator.canShare?.({ files: [new File([''], 'x.jpg', { type: 'image/jpeg' })] })
+    if (phone) document.querySelectorAll<HTMLAnchorElement>('a[download]').forEach(a => a.onclick = async e => {
+      e.preventDefault()
+      const blob = await fetch(a.href).then(r => r.blob())
+      navigator.share({ files: [new File([blob], a.download, { type: blob.type })] }).catch(() => {})
+    })
+  </script>
 </body>
 </html>
 
@@ -83,6 +90,8 @@ const parking = '46.06178, 14.63783'
 
   .links { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; margin: 12px 0 0; }
   code { padding: 2px 6px; border-radius: 4px; background: var(--line); }
+  .save { display: inline-block; margin-top: 12px; padding: 6px 14px; border: 1.5px solid var(--fg); border-radius: 4px; background: none; color: var(--fg); font: 600 14px 'Public Sans', sans-serif; text-decoration: none; cursor: pointer; }
+  .save:hover { background: var(--fg); color: var(--bg); }
   .approach, .wall { padding: 32px 0; border-bottom: 1px solid var(--line); }
   .wall { display: grid; grid-template-columns: 5fr 6fr; gap: 32px; align-items: start; }
   .wall img { width: 100%; height: auto; border-radius: 4px; }
@@ -100,4 +109,18 @@ const parking = '46.06178, 14.63783'
   footer { padding-top: 24px; color: var(--muted); font-size: 13px; }
 
   @media (max-width: 760px) { .wall { grid-template-columns: 1fr; } }
+
+  /* Print / save as PDF: light colours, keep grade badges, one wall never split across pages */
+  @page { margin: 12mm; }
+  @media print {
+    :root { --bg: #fff; --fg: #000; --muted: #444; --line: #ccc; color-scheme: light; }
+    * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    body { max-width: none; padding: 0; font-size: 12px; }
+    header { padding-top: 0; }
+    .links a, .save { display: none; }
+    .approach, .wall { padding: 16px 0; }
+    .wall { grid-template-columns: 5fr 6fr; gap: 20px; break-inside: avoid; }
+    li { padding: 6px 0; }
+    li p { font-size: 11px; }
+  }
 </style>
