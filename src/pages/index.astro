@@ -1,6 +1,9 @@
 ---
 import { Image } from 'astro:assets'
 import { walls } from '../walls'
+import '@fontsource/big-shoulders-display/800'
+import '@fontsource/public-sans/400'
+import '@fontsource/public-sans/600'
 
 // Font grades sort as plain strings ('6c' < '7a' < '8a' < '8a+'), so no lookup table needed.
 const band = (g = '') =>
@@ -14,7 +17,7 @@ const parking = '46.06178, 14.63783'
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Nenatančen vodniček Zaloga</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800&family=Public+Sans:wght@400;600&display=swap" />
+  <script is:inline>navigator.serviceWorker?.register('/sw.js')</script>
 </head>
 <body>
   <header>
@@ -55,7 +58,7 @@ const parking = '46.06178, 14.63783'
     </section>
   ))}
 
-  <footer>Ocene so po Fontainebleau lestvici.</footer>
+  <footer>Ocene so po Fontainebleau lestvici. Ko stran enkrat odpreš, deluje tudi brez signala.</footer>
 </body>
 </html>
 
